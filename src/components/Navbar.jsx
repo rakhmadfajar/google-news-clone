@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from 'react';
 import googleLogo from '../assets/google-logo.png';
 import icnSearch from '../assets/icn_search.png';
-import {signInWithPopup} from 'firebase/auth';
+import {signInWithPopup, signOut} from 'firebase/auth';
 import {auth, googleProvider} from '../firebase/setup';
 
 
 const Navbar = () => {
-    const {user, setUser} = useState(null);
+    const [user, setUser] = useState(null);
+
+    console.log(user);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((currentUser) =>{
@@ -20,13 +22,16 @@ const Navbar = () => {
     }, []);
 
     const googleSignin = async () => {
-        try{
-            await signInWithPopup(auth, googleProvider);
-        }
-        catch(error){
+        try {
+            if(user) {
+                await signOut(auth)
+            } else {
+                await signInWithPopup(auth, googleProvider);
+            }
+        } catch(error) {
             console.error(error);
         }
-    } 
+    }
 
     return(
         <div className='flex items-center justify-center p-6 w-screen'>
@@ -39,7 +44,7 @@ const Navbar = () => {
                 <img src={icnSearch} className="w-5 h-5" />
                 <input placeholder = 'Search for news' className='ml-4 bg-zinc-100'/>
             </div>
-            <button className='ml-44 bg-blue-600 text-white p-2 w-28 rounded-md' onClick={googleSignin}>Sign In</button>
+            <button className='ml-44 bg-blue-600 text-white p-2 w-28 rounded-md' onClick={googleSignin}>{user ? 'Sign out' : 'Sign in'}</button>
         </div>
     );
 }
